@@ -21,6 +21,7 @@
                 searchProvider: 'google',
                 id: 'map',
                 latLng: '0,0',
+                autocomplete: false,
                 mapOptions: {
                     zoom: 9
                 },
@@ -54,6 +55,8 @@
                         map = self._getMap(mapOptions);
         
                     var marker = self._getMarker(map, mapOptions.center);
+
+                    self._initAutocomplete(map);
 
                     // fix issue w/ marker not appearing
                     if (self.options.provider == 'google' && self.options.fixMarker)
@@ -138,6 +141,7 @@
                 },
 
                 googleSearchProvider: function(options, onload) {
+                    var self = this;
                     var url = options.api;
 
                     if (typeof options.apiKey !== 'undefined') {
@@ -145,16 +149,23 @@
                         url += 'key=' + options.apiKey;
                     }
 
+                    var css = [];
+
                     var js = [
                             url,
                             this.path + '/l.geosearch.provider.google.js'
                         ];
 
+                    if (options.autocomplete) {
+                        js.push(this.path + '/leaflet-gplaces-autocomplete.js');
+                        css.push(this.path + '/leaflet-gplaces-autocomplete.css');
+                    }
+
                     this._loadJSList(js, function(){
                         // https://github.com/smeijer/L.GeoSearch/issues/57#issuecomment-148393974
                         L.GeoSearch.Provider.Google.Geocoder = new google.maps.Geocoder();
 
-                        onload();
+                        self._loadCSSList(css, onload);
                     });
                 },
 
@@ -220,6 +231,13 @@
             error: function(message) {
                 console.log(message);
                 this.$id.html(message);
+            },
+
+
+            _initAutocomplete: function(map) {
+                if (this.options.provider == 'google' && this.options.autocomplete) {
+                    new L.Control.GPlaceAutocomplete().addTo(map);
+                }
             },
 
             _getMap: function(mapOptions) {
