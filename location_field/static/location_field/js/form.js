@@ -36,12 +36,20 @@
             }, options),
 
             autocomplete: null,
+            parentId: '',
 
             providers: /google|openstreetmap|mapbox/,
             searchProviders: /google/,
 
             render: function() {
                 this.$id = $('#' + this.options.id);
+                var parents = this.$id.parentsUntil('form', '[id]');
+                if (parents.length) {
+                    var id = parents.first().attr('id');
+                    if (id) {
+                        this.parentId = id + '-';
+                    }
+                }
 
                 if ( ! this.providers.test(this.options.provider)) {
                     this.error('render failed, invalid map provider: ' + this.options.provider);
@@ -79,15 +87,17 @@
             },
 
             initFields: function(fields, val) {
+                var self = this;
                 fields.forEach(function(name){
-                    var el = $('*[name='+name+']');
+                    var el = $('*[name='+self.parentId+name+']');
                     el.val(val);
                 });
             },
 
             updateValues: function(values) {
+                var self = this;
                 Object.keys(values).forEach(function(name){
-                    var el = $('*[name='+name+']');
+                    var el = $('*[name='+self.parentId+name+']');
                     if (el.get(0).tagName.toLowerCase() === 'select') {
                         var url = el.attr('data-ajax--url');
                         if (url) {
