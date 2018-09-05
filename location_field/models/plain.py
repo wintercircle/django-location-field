@@ -11,6 +11,7 @@ class PlainLocationField(BaseLocationField, CharField):
         super(PlainLocationField, self).__init__(*args, **kwargs)
 
         kwargs.pop('based_fields', None)
+        kwargs.pop('update_fields', None)
         kwargs.pop('zoom', None)
         kwargs.pop('suffix', None)
 

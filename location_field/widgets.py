@@ -15,6 +15,7 @@ class LocationWidget(widgets.TextInput):
         self.options = dict(settings.LOCATION_FIELD)
         self.options['field_options'] = {
             'based_fields': kwargs.pop('based_fields'),
+            'update_fields': kwargs.pop('update_fields', []),
         }
 
         super(LocationWidget, self).__init__(attrs)

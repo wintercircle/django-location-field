@@ -28,6 +28,7 @@
                     zoom: 9
                 },
                 basedFields: $(),
+                updateFields: {},
                 inputField: $(),
                 suffix: '',
                 path: '',
@@ -409,6 +410,7 @@
             options = el.data('location-field-options'),
             basedFields = options.field_options.based_fields,
             pluginOptions = {
+                updateFields: options.field_options.update_fields,
                 id: 'map_' + name,
                 inputField: el,
                 latLng: el.parent().find(':text').val() || '0,0',
