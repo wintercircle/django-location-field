@@ -28,6 +28,7 @@
                     zoom: 9
                 },
                 basedFields: $(),
+                updateFields: {},
                 inputField: $(),
                 suffix: '',
                 path: '',
@@ -60,14 +61,16 @@
         
                     var marker = self._getMarker(map, mapOptions.center);
 
-                    self._initAutocomplete(map, marker, self.options);
-
                     // fix issue w/ marker not appearing
                     if (self.options.provider == 'google' && self.options.fixMarker)
                         self.__fixMarker();
 
                     // watch based fields
-                    self._watchBasedFields(map, marker);
+                    if (self.options.autocomplete) {
+                        self._initAutocomplete(map, marker, self.options);
+                    } else {
+                        self._watchBasedFields(map, marker);
+                    }
                 });
             },
 
@@ -75,11 +78,51 @@
                 this.options.inputField.val(latLng.lat + ',' + latLng.lng);
             },
 
+            initFields: function(fields, val) {
+                fields.forEach(function(name){
+                    var el = $('*[name='+name+']');
+                    el.val(val);
+                });
+            },
+
+            updateValues: function(values) {
+                Object.keys(values).forEach(function(name){
+                    var el = $('*[name='+name+']');
+                    el.val(values[name]);
+                    if (el.get(0).tagName.toLowerCase() === 'select') {
+                        el.trigger('change');
+                    }
+                });
+            },
             // default callback for search
             updateLocation: function(place, map, marker) {
                 if (!place.geometry) {
                     return;
                 }
+
+                var details = {
+                  'locality': 'city',
+                  'administrative_area_level_1': 'state',
+                  'country': 'country',
+                  'postal_code': 'zip_code',
+                };
+
+                var values = {};
+                this.initFields(Object.values(details));
+
+                var city, state, country;
+
+                var keys = Object.keys(details);
+                for (let i=0; i<place.address_components.length; i++) {
+                    for (let j=0; j<keys.length; j++) {
+                        if (place.address_components[i].types.indexOf(keys[j]) !== -1) {
+                            values[details[keys[j]]] = place.address_components[i].long_name;
+                        }
+                    }
+                }
+
+                this.updateValues(values);
+
                 var latLng = new L.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
                 map.panTo(latLng);
                 marker.setLatLng(latLng);
@@ -243,7 +286,7 @@
 
             _initAutocomplete: function(map, marker, options) {
                 var self = this;
-                if (options.provider == 'google' && options.autocomplete) {
+                if (options.provider == 'google') {
                     var searchBox;
                     if (options.searchBox) {
                       searchBox = document.getElementById(options.searchBox);
@@ -377,6 +420,7 @@
             options = el.data('location-field-options'),
             basedFields = options.field_options.based_fields,
             pluginOptions = {
+                updateFields: options.field_options.update_fields,
                 id: 'map_' + name,
                 inputField: el,
                 latLng: el.parent().find(':text').val() || '0,0',

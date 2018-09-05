@@ -5,10 +5,10 @@ from location_field.widgets import LocationWidget
 
 
 class PlainLocationField(fields.CharField):
-    def __init__(self, based_fields=None, zoom=None, suffix='',
+    def __init__(self, based_fields=None, update_fields={}, zoom=None, suffix='',
                  *args, **kwargs):
 
-        self.widget = LocationWidget(based_fields=based_fields, zoom=zoom,
+        self.widget = LocationWidget(based_fields=based_fields, update_fields=update_fields, zoom=zoom,
                                      suffix=suffix, **kwargs)
 
         dwargs = {
