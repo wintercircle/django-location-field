@@ -60,14 +60,16 @@
         
                     var marker = self._getMarker(map, mapOptions.center);
 
-                    self._initAutocomplete(map, marker, self.options);
-
                     // fix issue w/ marker not appearing
                     if (self.options.provider == 'google' && self.options.fixMarker)
                         self.__fixMarker();
 
                     // watch based fields
-                    self._watchBasedFields(map, marker);
+                    if (self.options.autocomplete) {
+                        self._initAutocomplete(map, marker, self.options);
+                    } else {
+                        self._watchBasedFields(map, marker);
+                    }
                 });
             },
 
@@ -243,7 +245,7 @@
 
             _initAutocomplete: function(map, marker, options) {
                 var self = this;
-                if (options.provider == 'google' && options.autocomplete) {
+                if (options.provider == 'google') {
                     var searchBox;
                     if (options.searchBox) {
                       searchBox = document.getElementById(options.searchBox);
