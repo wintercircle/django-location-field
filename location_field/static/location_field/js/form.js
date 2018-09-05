@@ -286,7 +286,12 @@
                     onchangeTimer,
                     onchange = function() {
                         var values = basedFields.map(function() {
-                            var value = $(this).val();
+                            var value;
+                            if (this.nodeName.toLowerCase() === 'select') {
+                              value = $(this).children("option:selected" ).text();
+                            } else {
+                              value = $(this).val();
+                            }
                             return value === '' ? null : value;
                         });
                         var address = values.toArray().join(', ');
