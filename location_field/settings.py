@@ -8,7 +8,10 @@ LOCATION_FIELD = {
 
     'autocomplete.enabled': False,
     'autocomplete.field': None,
-    'autocomplete.options': {},
+    'autocomplete.options': {
+        'fields': ['name', 'address_components', 'geometry'],
+        'types': ['(cities)'],
+    },
 
     'search.provider': 'google',
     'search.suffix': '',
