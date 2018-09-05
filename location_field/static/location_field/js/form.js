@@ -254,6 +254,11 @@
                     google.maps.event.addListener(this.autocomplete, "place_changed", function () {
                         self.updateLocation(self.autocomplete.getPlace(), map, marker);
                     });
+                    google.maps.event.addDomListener(searchBox, 'keydown', function(event) { 
+                      if (event.keyCode === 13) {
+                        event.preventDefault();
+                      }
+                    });
                 }
             },
 
