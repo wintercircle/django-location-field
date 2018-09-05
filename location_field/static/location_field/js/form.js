@@ -21,6 +21,9 @@
                 searchProvider: 'google',
                 id: 'map',
                 latLng: '0,0',
+                autocomplete: false,
+                autocompleteOptions: {},
+                searchBox: null,
                 mapOptions: {
                     zoom: 9
                 },
@@ -30,6 +33,8 @@
                 path: '',
                 fixMarker: true
             }, options),
+
+            autocomplete: null,
 
             providers: /google|openstreetmap|mapbox/,
             searchProviders: /google/,
@@ -55,6 +60,8 @@
         
                     var marker = self._getMarker(map, mapOptions.center);
 
+                    self._initAutocomplete(map, marker, self.options);
+
                     // fix issue w/ marker not appearing
                     if (self.options.provider == 'google' && self.options.fixMarker)
                         self.__fixMarker();
@@ -66,6 +73,16 @@
 
             fill: function(latLng) {
                 this.options.inputField.val(latLng.lat + ',' + latLng.lng);
+            },
+
+            // default callback for search
+            updateLocation: function(place, map, marker) {
+                if (!place.geometry) {
+                    return;
+                }
+                var latLng = new L.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+                map.panTo(latLng);
+                marker.setLatLng(latLng);
             },
 
             search: function(map, marker, address) {
@@ -138,6 +155,7 @@
                 },
 
                 googleSearchProvider: function(options, onload) {
+                    var self = this;
                     var url = options.api;
 
                     if (typeof options.apiKey !== 'undefined') {
@@ -220,6 +238,28 @@
             error: function(message) {
                 console.log(message);
                 this.$id.html(message);
+            },
+
+
+            _initAutocomplete: function(map, marker, options) {
+                var self = this;
+                if (options.provider == 'google' && options.autocomplete) {
+                    var searchBox;
+                    if (options.searchBox) {
+                      searchBox = document.getElementById(options.searchBox);
+                    } else if (options.basedFields.length != 0) {
+                      searchBox = options.basedFields[0];
+                    }
+                    this.autocomplete = new google.maps.places.Autocomplete(searchBox, options.autocompleteOptions);
+                    google.maps.event.addListener(this.autocomplete, "place_changed", function () {
+                        self.updateLocation(self.autocomplete.getPlace(), map, marker);
+                    });
+                    google.maps.event.addDomListener(searchBox, 'keydown', function(event) { 
+                      if (event.keyCode === 13) {
+                        event.preventDefault();
+                      }
+                    });
+                }
             },
 
             _getMap: function(mapOptions) {
@@ -344,6 +384,9 @@
                 path: options['resources.root_path'],
                 provider: options['map.provider'],
                 searchProvider: options['search.provider'],
+                autocomplete: options['autocomplete.enabled'],
+                autocompleteOptions: options['autocomplete.options'],
+                searchBox: options['autocomplete.field'],
                 providerOptions: {
                     google: {
                         api: options['provider.google.api'],
