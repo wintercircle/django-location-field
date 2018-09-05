@@ -88,9 +88,34 @@
             updateValues: function(values) {
                 Object.keys(values).forEach(function(name){
                     var el = $('*[name='+name+']');
-                    el.val(values[name]);
                     if (el.get(0).tagName.toLowerCase() === 'select') {
-                        el.trigger('change');
+                        var url = el.attr('data-ajax--url');
+                        if (url) {
+                            el.val('');
+                            $.ajax(url+'?term='+values[name], {
+                                success: (data, textStatus, jqXHR) => {
+                                    if (data.results.length === 0) {
+                                        return;
+                                    }
+
+                                    var id = data.results[0].id;
+
+                                    if (el.find('option[value="'+id+'"]').length === 0) {
+                                        el.append('<option value="'+id+'">'+values[name]+'</option>');
+                                    }
+
+                                    el.val(id).trigger('change');
+                                },
+                            });
+                        } else {
+                            el.find('option:contains('+values[name]+')').each(function(){
+                                if ($(this).text() == values[name]) {
+                                    el.val($(this).attr('value'));
+                                }
+                            });
+                        }
+                    } else {
+                        el.val(values[name]);
                     }
                 });
             },
