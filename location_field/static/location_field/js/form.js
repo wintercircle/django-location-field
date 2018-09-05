@@ -120,17 +120,10 @@
                 });
             },
             // default callback for search
-            updateLocation: function(place, map, marker) {
+            updateLocation: function(place, map, marker, details) {
                 if (!place.geometry) {
                     return;
                 }
-
-                var details = {
-                  'locality': 'city',
-                  'administrative_area_level_1': 'state',
-                  'country': 'country',
-                  'postal_code': 'zip_code',
-                };
 
                 var values = {};
                 this.initFields(Object.values(details));
@@ -320,7 +313,7 @@
                     }
                     this.autocomplete = new google.maps.places.Autocomplete(searchBox, options.autocompleteOptions);
                     google.maps.event.addListener(this.autocomplete, "place_changed", function () {
-                        self.updateLocation(self.autocomplete.getPlace(), map, marker);
+                        self.updateLocation(self.autocomplete.getPlace(), map, marker, options.updateFields);
                     });
                     google.maps.event.addDomListener(searchBox, 'keydown', function(event) { 
                       if (event.keyCode === 13) {
