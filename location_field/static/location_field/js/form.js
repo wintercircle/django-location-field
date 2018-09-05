@@ -36,12 +36,20 @@
             }, options),
 
             autocomplete: null,
+            parentId: '',
 
             providers: /google|openstreetmap|mapbox/,
             searchProviders: /google/,
 
             render: function() {
                 this.$id = $('#' + this.options.id);
+                var parents = this.$id.parentsUntil('form', '[id]');
+                if (parents.length) {
+                    var id = parents.first().attr('id');
+                    if (id) {
+                        this.parentId = id + '-';
+                    }
+                }
 
                 if ( ! this.providers.test(this.options.provider)) {
                     this.error('render failed, invalid map provider: ' + this.options.provider);
@@ -79,15 +87,17 @@
             },
 
             initFields: function(fields, val) {
+                var self = this;
                 fields.forEach(function(name){
-                    var el = $('*[name='+name+']');
+                    var el = $('*[name='+self.parentId+name+']');
                     el.val(val);
                 });
             },
 
             updateValues: function(values) {
+                var self = this;
                 Object.keys(values).forEach(function(name){
-                    var el = $('*[name='+name+']');
+                    var el = $('*[name='+self.parentId+name+']');
                     if (el.get(0).tagName.toLowerCase() === 'select') {
                         var url = el.attr('data-ajax--url');
                         if (url) {
@@ -120,17 +130,10 @@
                 });
             },
             // default callback for search
-            updateLocation: function(place, map, marker) {
+            updateLocation: function(place, map, marker, details) {
                 if (!place.geometry) {
                     return;
                 }
-
-                var details = {
-                  'locality': 'city',
-                  'administrative_area_level_1': 'state',
-                  'country': 'country',
-                  'postal_code': 'zip_code',
-                };
 
                 var values = {};
                 this.initFields(Object.values(details));
@@ -320,7 +323,7 @@
                     }
                     this.autocomplete = new google.maps.places.Autocomplete(searchBox, options.autocompleteOptions);
                     google.maps.event.addListener(this.autocomplete, "place_changed", function () {
-                        self.updateLocation(self.autocomplete.getPlace(), map, marker);
+                        self.updateLocation(self.autocomplete.getPlace(), map, marker, options.updateFields);
                     });
                     google.maps.event.addDomListener(searchBox, 'keydown', function(event) { 
                       if (event.keyCode === 13) {
