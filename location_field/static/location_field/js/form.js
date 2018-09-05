@@ -22,6 +22,8 @@
                 id: 'map',
                 latLng: '0,0',
                 autocomplete: false,
+                autocompleteOptions: {},
+                searchBox: null,
                 mapOptions: {
                     zoom: 9
                 },
@@ -31,6 +33,8 @@
                 path: '',
                 fixMarker: true
             }, options),
+
+            autocomplete: null,
 
             providers: /google|openstreetmap|mapbox/,
             searchProviders: /google/,
@@ -56,7 +60,7 @@
         
                     var marker = self._getMarker(map, mapOptions.center);
 
-                    self._initAutocomplete(map);
+                    self._initAutocomplete(map, marker, self.options);
 
                     // fix issue w/ marker not appearing
                     if (self.options.provider == 'google' && self.options.fixMarker)
@@ -69,6 +73,16 @@
 
             fill: function(latLng) {
                 this.options.inputField.val(latLng.lat + ',' + latLng.lng);
+            },
+
+            // default callback for search
+            updateLocation: function(place, map, marker) {
+                if (!place.geometry) {
+                    return;
+                }
+                var latLng = new L.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+                map.panTo(latLng);
+                marker.setLatLng(latLng);
             },
 
             search: function(map, marker, address) {
@@ -149,23 +163,16 @@
                         url += 'key=' + options.apiKey;
                     }
 
-                    var css = [];
-
                     var js = [
                             url,
                             this.path + '/l.geosearch.provider.google.js'
                         ];
 
-                    if (options.autocomplete) {
-                        js.push(this.path + '/leaflet-gplaces-autocomplete.js');
-                        css.push(this.path + '/leaflet-gplaces-autocomplete.css');
-                    }
-
                     this._loadJSList(js, function(){
                         // https://github.com/smeijer/L.GeoSearch/issues/57#issuecomment-148393974
                         L.GeoSearch.Provider.Google.Geocoder = new google.maps.Geocoder();
 
-                        self._loadCSSList(css, onload);
+                        onload();
                     });
                 },
 
@@ -234,9 +241,14 @@
             },
 
 
-            _initAutocomplete: function(map) {
-                if (this.options.provider == 'google' && this.options.autocomplete) {
-                    new L.Control.GPlaceAutocomplete().addTo(map);
+            _initAutocomplete: function(map, marker, options) {
+                var self = this;
+                if (options.provider == 'google' && options.autocomplete && options.searchBox) {
+                    var searchBox = document.getElementById(options.searchBox);
+                    this.autocomplete = new google.maps.places.Autocomplete(searchBox, options.autocompleteOptions);
+                    google.maps.event.addListener(this.autocomplete, "place_changed", function () {
+                        self.updateLocation(self.autocomplete.getPlace(), map, marker);
+                    });
                 }
             },
 
@@ -352,6 +364,9 @@
                 path: options['resources.root_path'],
                 provider: options['map.provider'],
                 searchProvider: options['search.provider'],
+                autocomplete: options['autocomplete.enabled'],
+                autocompleteOptions: options['autocomplete.options'],
+                searchBox: options['autocomplete.field'],
                 providerOptions: {
                     google: {
                         api: options['provider.google.api'],

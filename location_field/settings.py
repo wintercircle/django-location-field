@@ -6,6 +6,10 @@ LOCATION_FIELD = {
     'map.provider': 'google',
     'map.zoom': 13,
 
+    'autocomplete.enabled': False,
+    'autocomplete.field': None,
+    'autocomplete.options': {},
+
     'search.provider': 'google',
     'search.suffix': '',
 
