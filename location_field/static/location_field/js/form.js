@@ -243,8 +243,13 @@
 
             _initAutocomplete: function(map, marker, options) {
                 var self = this;
-                if (options.provider == 'google' && options.autocomplete && options.searchBox) {
-                    var searchBox = document.getElementById(options.searchBox);
+                if (options.provider == 'google' && options.autocomplete) {
+                    var searchBox;
+                    if (options.searchBox) {
+                      searchBox = document.getElementById(options.searchBox);
+                    } else if (options.basedFields.length != 0) {
+                      searchBox = options.basedFields[0];
+                    }
                     this.autocomplete = new google.maps.places.Autocomplete(searchBox, options.autocompleteOptions);
                     google.maps.event.addListener(this.autocomplete, "place_changed", function () {
                         self.updateLocation(self.autocomplete.getPlace(), map, marker);
