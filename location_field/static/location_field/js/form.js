@@ -433,8 +433,7 @@
         }
     }
 
-    $('input[data-location-field-options]:visible').livequery(function(){
-        var el = $(this);
+    initMap = function(el) {
 
         if ( ! el.is(':visible'))
             return;
@@ -496,6 +495,18 @@
 
         // render
         $.locationField(pluginOptions).render();
+    };
+
+    $( document ).ready(function() {
+        $('input[data-location-field-options]').each(function(){
+            var el = $(this);
+            initMap(el);
+        });
+    });
+
+    $('input[data-location-field-options]:visible').livequery(function(){
+        var el = $(this);
+        initMap(el);
     });
 
 }(jQuery || django.jQuery);
