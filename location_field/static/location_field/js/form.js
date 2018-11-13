@@ -351,9 +351,16 @@
 
         // prefix
         var prefixNumber;
+        let regexRule = /-(\d+)-/g;
+        var matches = [];
 
         try {
-            prefixNumber = name.match(/-(\d+)-/)[1];
+            let match = null;
+            for(match = regexRule.exec(name); match != null; match = regexRule.exec(name))
+            {
+                matches.push(match[1]);
+            }
+            prefixNumber = matches[matches.length-1];
         } catch (e) {}
 
         if (prefixNumber != undefined && options.field_options.prefix) {
