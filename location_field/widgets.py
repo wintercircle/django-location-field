@@ -33,7 +33,7 @@ class LocationWidget(widgets.TextInput):
                     float(lat),
                     float(lng),
                 )
-            except ValueError:
+            except (AttributeError, ValueError):
                 value = ''
         else:
             value = ''

@@ -8,5 +8,5 @@ class LocationField(PlainLocationField):
         try:
             lat, lng = value.split(',')
             return Point(float(lng), float(lat))
-        except ValueError:
+        except (AttributeError, ValueError):
             return None
