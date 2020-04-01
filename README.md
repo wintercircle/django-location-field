@@ -1,30 +1,34 @@
-Django Location Field
+![logo](django-location-field.png)
+
+django-location-field
 ==
 
 Let users pick locations using a map widget and store its latitude and longitude.
 
-**Stable version:** [django-location-field==2.0.6](https://pypi.python.org/pypi/django-location-field/2.0.6)
-
+**Stable version:** [django-location-field==2.1.0](https://pypi.python.org/pypi/django-location-field/2.1.0)  
+**Documentation:** [https://django-location-field.readthedocs.io/en/latest/](https://django-location-field.readthedocs.io/en/latest/)  
 **License:** MIT
 
 Status
 --
 
-[![Build Status](https://travis-ci.org/caioariede/django-location-field.svg?branch=master)](https://travis-ci.org/caioariede/django-location-field)
+[![Build Status](https://travis-ci.org/caioariede/django-location-field.svg?branch=master)](https://travis-ci.org/caioariede/django-location-field) [![Documentation Status](https://readthedocs.org/projects/django-location-field/badge/?version=latest)](https://django-location-field.readthedocs.io/en/latest/?badge=latest)
+ [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/caioariede)
 
-Tests are performed with Python 2.7, Django 1.8 .. 1.10 and SpatiaLite. We'd like to have automated tests for Python 3 too, but it looks like pysqlite (which is used for testing) does not support it yet, so it's blocking us. You can get more details in the [tox.ini](https://github.com/caioariede/django-location-field/blob/master/tox.ini#L40) file.
+Tests are performed with Python 2 and 3, Django 1.11 and 2, and SpatiaLite.
 
 Features
 --
 
 * Support for multiple map engines, like Google Maps, OpenStreetMap and Mapbox.
+* Support for multiple search engines, like Google, Nominatim and Yandex.
 * Works with both Spatial and non-Spatial databases.
 
 Compatibility
 --
 
-* Django 1.8 to 1.10
-* Python 2.7 to 3.5
+* Django >= 1.11
+* Python 2.7, 3.6, 3.7
 
 Spatial Databases
 --
@@ -56,10 +60,7 @@ from location_field.models.spatial import LocationField
 class Place(models.Model):
     city = models.CharField(max_length=255)
     location = LocationField(based_fields=['city'], zoom=7, default=Point(1.0, 1.0))
-    objects = models.GeoManager()
 ```
-
-Look that you must put `models.GeoManager()` in your model, or some errors will occur.
 
 Basic usage (without Spatial Database)
 --
@@ -77,3 +78,7 @@ Screenshot
 --
 
 ![Screenshot](https://github.com/caioariede/django-location-field/raw/master/screenshot.png)
+
+---
+
+[Nick Frost](https://www.iconfinder.com/Gimpopo) has credit over the [image](django-location-field.png) used as logo for this project. [CC BY](https://creativecommons.org/licenses/by/3.0/)

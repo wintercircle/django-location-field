@@ -1,3 +1,61 @@
+var SequentialLoader = function() {
+    var SL = {
+        loadJS: function(src, onload) {
+            //console.log(src);
+            // add to pending list
+            this._load_pending.push({'src': src, 'onload': onload});
+            // check if not already loading
+            if ( ! this._loading) {
+                this._loading = true;
+                // load first
+                this.loadNextJS();
+            }
+        },
+
+        loadNextJS: function() {
+            // get next
+            var next = this._load_pending.shift();
+            if (next == undefined) {
+                // nothing to load
+                this._loading = false;
+                return;
+            }
+            // check not loaded
+            if (this._load_cache[next.src] != undefined) {
+                next.onload();
+                this.loadNextJS();
+                return; // already loaded
+            }
+            else {
+                this._load_cache[next.src] = 1;
+            }
+            // load
+            var el = document.createElement('script');
+            el.type = 'application/javascript';
+            el.src = next.src;
+            // onload callback
+            var self = this;
+            el.onload = function(){
+                //console.log('Loaded: ' + next.src);
+                // trigger onload
+                next.onload();
+                // try to load next
+                self.loadNextJS();
+            };
+            document.body.appendChild(el);
+        },
+
+        _loading: false,
+        _load_pending: [],
+        _load_cache: {}
+    };
+
+    return {
+        loadJS: SL.loadJS.bind(SL)
+    }
+};
+
+
 !function($){
     var LocationFieldCache = {
         load: [],
@@ -39,7 +97,7 @@
             parentId: '',
 
             providers: /google|openstreetmap|mapbox/,
-            searchProviders: /google|yandex/,
+            searchProviders: /google|yandex|nominatim/,
 
             render: function() {
                 this.$id = $('#' + this.options.id);
@@ -195,6 +253,35 @@
 
                     request.onerror = function () {
                         console.error('Check connection to Yandex geocoder');
+                    };
+
+                    request.send();
+                }
+
+                else if (this.options.searchProvider === 'nominatim') {
+                    var url = '//nominatim.openstreetmap.org/search/?format=json&q=' + address;
+
+                    var request = new XMLHttpRequest();
+                    request.open('GET', url, true);
+
+                    request.onload = function () {
+                        if (request.status >= 200 && request.status < 400) {
+                            var data = JSON.parse(request.responseText);
+                            if (data.length > 0) {
+                                var pos = data[0];
+                                var latLng = new L.LatLng(pos.lat, pos.lon);
+                                marker.setLatLng(latLng);
+                                map.panTo(latLng);
+                            } else {
+                                console.error(address + ': not found via Nominatim');
+                            }
+                        } else {
+                            console.error('Nominatim geocoder error response');
+                        }
+                    };
+
+                    request.onerror = function () {
+                        console.error('Check connection to Nominatim geocoder');
                     };
 
                     request.send();
@@ -376,7 +463,7 @@
                 }
                 else if (this.options.provider == 'openstreetmap') {
                     layer = new L.tileLayer(
-                        'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             maxZoom: 18
                         });
                 }
@@ -468,11 +555,32 @@
         }
     }
 
-    $('input[data-location-field-options]:visible').livequery(function(){
-        var el = $(this);
+    function dataLocationFieldObserver(callback) {
+      function _findAndEnableDataLocationFields() {
+        var dataLocationFields = $('input[data-location-field-options]');
 
-        if ( ! el.is(':visible'))
-            return;
+        dataLocationFields
+          .filter(':not([data-location-field-observed])')
+          .attr('data-location-field-observed', true)
+          .each(callback);
+      }
+
+      var observer = new MutationObserver(function(mutations){
+      console.log(mutations);
+        _findAndEnableDataLocationFields();
+      });
+
+      var container = document.documentElement || document.body;
+
+      $(container).ready(function(){
+        _findAndEnableDataLocationFields();
+      });
+
+      observer.observe(container, {attributes: true});
+    }
+
+    dataLocationFieldObserver(function(){
+        var el = $(this);
 
         if (el.hasClass('location-field-processed'))
             return;
@@ -486,7 +594,7 @@
                 updateFields: options.field_options.update_fields,
                 id: 'map_' + name,
                 inputField: el,
-                latLng: el.parent().find(':text').val() || '0,0',
+                latLng: el.val() || '0,0',
                 suffix: options['search.suffix'],
                 path: options['resources.root_path'],
                 provider: options['map.provider'],
@@ -526,8 +634,12 @@
             prefixNumber = matches[matches.length-1];
         } catch (e) {}
 
-        if (prefixNumber != undefined && options.field_options.prefix) {
-            var prefix = options.field_options.prefix.replace(/__prefix__/, prefixNumber);
+        if (options.field_options.prefix) {
+            var prefix = options.field_options.prefix;
+
+            if (prefixNumber != null) {
+                prefix = prefix.replace(/__prefix__/, prefixNumber);
+            }
 
             basedFields = basedFields.map(function(n){
                 return prefix + n
@@ -544,65 +656,6 @@
     });
 
 }(jQuery || django.jQuery);
-
-
-var SequentialLoader = function() {
-    var SL = {
-        loadJS: function(src, onload) {
-            //console.log(src);
-            // add to pending list
-            this._load_pending.push({'src': src, 'onload': onload});
-            // check if not already loading
-            if ( ! this._loading) {
-                this._loading = true;
-                // load first
-                this.loadNextJS();
-            }
-        },
-
-        loadNextJS: function() {
-            // get next
-            var next = this._load_pending.shift();
-            if (next == undefined) {
-                // nothing to load
-                this._loading = false;
-                return;
-            }
-            // check not loaded
-            if (this._load_cache[next.src] != undefined) {
-                next.onload();
-                this.loadNextJS();
-                return; // already loaded
-            }
-            else {
-                this._load_cache[next.src] = 1;
-            }
-            // load
-            var el = document.createElement('script');
-            el.type = 'application/javascript';
-            el.src = next.src;
-            // onload callback
-            var self = this;
-            el.onload = function(){
-                //console.log('Loaded: ' + next.src);
-                // trigger onload
-                next.onload();
-                // try to load next
-                self.loadNextJS();
-            };
-            document.body.appendChild(el);
-        },
-
-        _loading: false,
-        _load_pending: [],
-        _load_cache: {}
-    };
-
-    return {
-        loadJS: SL.loadJS.bind(SL)
-    }
-};
-
 
 /*!
 loadCSS: load a CSS file asynchronously.

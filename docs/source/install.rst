@@ -43,6 +43,31 @@ At this moment we support three map providers:
 Choose a search provider
 ------------------------
 
-At this moment there's only one search provider:
+At this moment we support three search providers:
 
-- Google
+- `Google <providers.html#google>`__
+- `Yandex <https://tech.yandex.com/maps/geocoder/>`__
+- `Nominatim <https://wiki.openstreetmap.org/wiki/Nominatim>`__
+
+
+Rendering form with a map
+=========================
+
+**NOTE:** If you will be using the map widget only inside Django admin, you can
+skip this section as it should work out-of-the-box.
+
+The way to render a form containing a map is the same as any other forms
+containing their own javascript and stylesheets, except that you need to ensure
+your page loads ``jQuery``.
+
+.. code-block:: html
+
+   <head>
+      <script src="[ link to jquery.js goes here ]"></script>
+      {{form.media}}
+   </head>
+   <body>
+      {{form}}
+   </body>
+
+You can find a running example in the example app (``example/`` directory).
