@@ -373,15 +373,17 @@
     };
 
     $( document ).ready(function() {
-        $('input[data-location-field-options]').each(function(){
+        $('input[data-location-field-options]:visible').each(function(){
             var el = $(this);
             initMap(el);
         });
     });
 
-    $('input[data-location-field-options]:visible').livequery(function(){
-        var el = $(this);
-        initMap(el);
+    $( document ).on('formset:added', function(event, $row, formsetName) {
+        $row.find('input[data-location-field-options]:visible').each(function(){
+            var el = $(this);
+            initMap(el);
+        });
     });
 
 }(jQuery || django.jQuery);
