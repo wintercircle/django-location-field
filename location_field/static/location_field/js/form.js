@@ -439,32 +439,7 @@ var SequentialLoader = function() {
         }
     }
 
-    function dataLocationFieldObserver(callback) {
-      function _findAndEnableDataLocationFields() {
-        var dataLocationFields = $('input[data-location-field-options]');
-
-        dataLocationFields
-          .filter(':not([data-location-field-observed])')
-          .attr('data-location-field-observed', true)
-          .each(callback);
-      }
-
-      var observer = new MutationObserver(function(mutations){
-      console.log(mutations);
-        _findAndEnableDataLocationFields();
-      });
-
-      var container = document.documentElement || document.body;
-
-      $(container).ready(function(){
-        _findAndEnableDataLocationFields();
-      });
-
-      observer.observe(container, {attributes: true});
-    }
-
-    dataLocationFieldObserver(function(){
-        var el = $(this);
+    initMap = function(el) {
 
         var name = el.attr('name'),
             options = el.data('location-field-options'),
@@ -521,6 +496,26 @@ var SequentialLoader = function() {
 
         // render
         $.locationField(pluginOptions).render();
+    };
+
+    $( document ).ready(function() {
+        $('input[data-location-field-options]:visible')
+          .attr('data-location-field-initialised', true)
+          .each(function(){
+            var el = $(this);
+            initMap(el);
+        });
+    });
+
+    $( document ).on('formset:added', function(event, $row, formsetName) {
+        $row
+          .find('input[data-location-field-options]:visible')
+          .filter(':not([data-location-field-initialised])')
+          .attr('data-location-field-initialised', true)
+          .each(function(){
+            var el = $(this);
+            initMap(el);
+        });
     });
 
 }(jQuery || django.jQuery);
