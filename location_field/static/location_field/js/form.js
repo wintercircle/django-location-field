@@ -98,6 +98,10 @@
                 var self = this;
                 Object.keys(values).forEach(function(name){
                     var el = $('*[name='+self.parentId+name+']');
+                    if (!el || el.length === 0 || !el.get(0)) {
+                      // couldn't find the corresponding field, skip
+                      return;
+                    }
                     if (el.get(0).tagName.toLowerCase() === 'select') {
                         var url = el.attr('data-ajax--url');
                         if (url) {
