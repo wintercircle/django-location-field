@@ -498,8 +498,8 @@ var SequentialLoader = function() {
         $.locationField(pluginOptions).render();
     };
 
-    $( document ).ready(function() {
-        $('input[data-location-field-options]:visible')
+    $(function() {
+        $('input[data-location-field-options]')
           .attr('data-location-field-initialised', true)
           .each(function(){
             var el = $(this);
