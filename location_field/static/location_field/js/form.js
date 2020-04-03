@@ -504,7 +504,7 @@
         $.locationField(pluginOptions).render();
     };
 
-    $( document ).ready(function() {
+    $(function() {
         $('input[data-location-field-options]:visible').each(function(){
             var el = $(this);
             initMap(el);
