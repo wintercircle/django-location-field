@@ -26,6 +26,7 @@ LOCATION_FIELD = {
     'resources.root_path': LOCATION_FIELD_PATH,
     'resources.media': {
         'js': [
+            'admin/js/jquery.init.js',
             LOCATION_FIELD_PATH + '/js/form.js',
         ],
     },
