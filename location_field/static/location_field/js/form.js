@@ -104,9 +104,12 @@
                     }
                     if (el.get(0).tagName.toLowerCase() === 'select') {
                         var url = el.attr('data-ajax--url');
+                        var applabel = el.attr('data-app-label');
+                        var modelname = el.attr('data-model-name');
+                        var fieldname = el.attr('data-field-name');
                         if (url) {
                             el.val('');
-                            $.ajax(url+'?term='+values[name], {
+                            $.ajax(url+'?term='+values[name]+'&app_label='+applabel+'&model_name='+modelname+'&field_name='+fieldname, {
                                 success: (data, textStatus, jqXHR) => {
                                     if (data.results.length === 0) {
                                         return;
